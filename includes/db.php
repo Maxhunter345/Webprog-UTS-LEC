@@ -1,7 +1,7 @@
 <?php
 // db.php
 $host = 'localhost';
-$db = 'event_registration';
+$db = '2024';
 $user = 'root';  // Ganti dengan username MySQL Anda
 $pass = '';      // Ganti dengan password MySQL Anda
 

@@ -58,7 +58,7 @@ body {
 
 .input-box label {
     position: absolute;
-    left: 0;
+    left: 10px; /* Ubah dari 0 ke 10px */
     top: 50%;
     transform: translateY(-50%);
     pointer-events: none;
@@ -69,6 +69,7 @@ body {
 .input-box input:focus ~ label,
 .input-box input:not(:placeholder-shown) ~ label {
     top: -10px;
+    left: 10px; /* Sesuaikan agar tidak tabrakan */
     color: #00c6ff;
 }
 
