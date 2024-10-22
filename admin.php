@@ -240,7 +240,7 @@ $events = $stmt->fetchAll();
             </div>
         <?php endforeach; ?>
 
-        <a href="logout.php" class="btn">Logout</a>
+        <a href="login.php?action=logout" class="btn">Logout</a>
     </div>
 
     <script>
