@@ -65,10 +65,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['register_event'])) {
                     $stmt->execute([$user_id, $event_id]);
                     $registration_id = $pdo->lastInsertId();
                     
-                    // Store registration details
-                    $stmt = $pdo->prepare("INSERT INTO registration_details (registration_id, first_name, last_name, phone_number, country) VALUES (?, ?, ?, ?, ?)");
-                    $stmt->execute([$registration_id, $user['first_name'], $user['last_name'], $user['phone_number'], $user['country']]);
-                    
                     $pdo->commit();
                     $success_message = "You have successfully registered for the event!";
                 }
