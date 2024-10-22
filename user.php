@@ -10,33 +10,73 @@ if (!isset($_SESSION['user_id'])) {
 $user_id = $_SESSION['user_id'];
 $success_message = $error_message = '';
 
-// Handle event registration
-if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['register_event'])) {
-    $event_id = (int)$_POST['event_id'];
+// Fetch user profile information
+$stmt = $pdo->prepare("SELECT * FROM users WHERE id = ?");
+$stmt->execute([$user_id]);
+$user = $stmt->fetch();
+
+// Handle profile submission
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['update_profile'])) {
+    $first_name = htmlspecialchars($_POST['first_name'], ENT_QUOTES, 'UTF-8');
+    $last_name = htmlspecialchars($_POST['last_name'], ENT_QUOTES, 'UTF-8');
+    $phone_number = htmlspecialchars($_POST['phone_number'], ENT_QUOTES, 'UTF-8');
+    $country = htmlspecialchars($_POST['country'], ENT_QUOTES, 'UTF-8');
     
     try {
-        // Check if user is already registered
-        $stmt = $pdo->prepare("SELECT * FROM registrations WHERE user_id = ? AND event_id = ?");
-        $stmt->execute([$user_id, $event_id]);
-        if ($stmt->rowCount() > 0) {
-            $error_message = "You are already registered for this event.";
-        } else {
-            // Check if event has reached max visitors
-            $stmt = $pdo->prepare("SELECT max_visitors, (SELECT COUNT(*) FROM registrations WHERE event_id = events.id) as current_visitors FROM events WHERE id = ?");
-            $stmt->execute([$event_id]);
-            $event = $stmt->fetch();
-            
-            if ($event['current_visitors'] >= $event['max_visitors']) {
-                $error_message = "This event has reached its maximum number of visitors.";
-            } else {
-                // Register user for the event
-                $stmt = $pdo->prepare("INSERT INTO registrations (user_id, event_id) VALUES (?, ?)");
-                $stmt->execute([$user_id, $event_id]);
-                $success_message = "You have successfully registered for the event!";
-            }
-        }
+        $stmt = $pdo->prepare("UPDATE users SET first_name = ?, last_name = ?, phone_number = ?, country = ?, profile_completed = TRUE WHERE id = ?");
+        $stmt->execute([$first_name, $last_name, $phone_number, $country, $user_id]);
+        $success_message = "Profile updated successfully!";
+        $user['profile_completed'] = true;
+        $user['first_name'] = $first_name;
+        $user['last_name'] = $last_name;
+        $user['phone_number'] = $phone_number;
+        $user['country'] = $country;
     } catch (PDOException $e) {
-        $error_message = "Error registering for event: " . $e->getMessage();
+        $error_message = "Error updating profile: " . $e->getMessage();
+    }
+}
+
+// Handle event registration
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['register_event'])) {
+    if (!$user['profile_completed']) {
+        $error_message = "Please complete your profile before registering for events.";
+    } else {
+        $event_id = (int)$_POST['event_id'];
+        
+        try {
+            // Check if user is already registered
+            $stmt = $pdo->prepare("SELECT * FROM registrations WHERE user_id = ? AND event_id = ?");
+            $stmt->execute([$user_id, $event_id]);
+            if ($stmt->rowCount() > 0) {
+                $error_message = "You are already registered for this event.";
+            } else {
+                // Check if event has reached max visitors
+                $stmt = $pdo->prepare("SELECT max_visitors, (SELECT COUNT(*) FROM registrations WHERE event_id = events.id) as current_visitors FROM events WHERE id = ?");
+                $stmt->execute([$event_id]);
+                $event = $stmt->fetch();
+                
+                if ($event['current_visitors'] >= $event['max_visitors']) {
+                    $error_message = "This event has reached its maximum number of visitors.";
+                } else {
+                    $pdo->beginTransaction();
+                    
+                    // Register user for the event
+                    $stmt = $pdo->prepare("INSERT INTO registrations (user_id, event_id) VALUES (?, ?)");
+                    $stmt->execute([$user_id, $event_id]);
+                    $registration_id = $pdo->lastInsertId();
+                    
+                    // Store registration details
+                    $stmt = $pdo->prepare("INSERT INTO registration_details (registration_id, first_name, last_name, phone_number, country) VALUES (?, ?, ?, ?, ?)");
+                    $stmt->execute([$registration_id, $user['first_name'], $user['last_name'], $user['phone_number'], $user['country']]);
+                    
+                    $pdo->commit();
+                    $success_message = "You have successfully registered for the event!";
+                }
+            }
+        } catch (PDOException $e) {
+            $pdo->rollBack();
+            $error_message = "Error registering for event: " . $e->getMessage();
+        }
     }
 }
 
@@ -56,7 +96,6 @@ $events = $stmt->fetchAll();
 ?>
 
 <!DOCTYPE html>
-<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -64,6 +103,7 @@ $events = $stmt->fetchAll();
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+    <?php include 'navbar.php'; ?>
     <div class="container">
         <h1>Division Defence Expo 2024</h1>
         <h2>User Dashboard</h2>
@@ -74,6 +114,38 @@ $events = $stmt->fetchAll();
         <?php if ($error_message): ?>
             <p class="error"><?php echo $error_message; ?></p>
         <?php endif; ?>
+
+        <?php if (!$user['profile_completed']): ?>
+            <div class="profile-form">
+                <h3>Complete Your Profile</h3>
+                <p>Please complete your profile before registering for events.</p>
+                <form method="post" action="">
+                    <input type="text" name="first_name" placeholder="First Name" required>
+                    <input type="text" name="last_name" placeholder="Last Name" required>
+                    <input type="tel" name="phone_number" placeholder="Phone Number" required>
+                    <input type="text" name="country" placeholder="Country" required>
+                    <button type="submit" name="update_profile">Save Profile</button>
+                </form>
+            </div>
+        <?php else: ?>
+            <div class="profile-section">
+                <h3>My Profile</h3>
+                <p>Name: <?php echo htmlspecialchars($user['first_name'] . ' ' . $user['last_name']); ?></p>
+                <p>Email: <?php echo htmlspecialchars($user['email']); ?></p>
+                <p>Phone: <?php echo htmlspecialchars($user['phone_number']); ?></p>
+                <p>Country: <?php echo htmlspecialchars($user['country']); ?></p>
+                <button onclick="showEditProfile()">Edit Profile</button>
+                
+                <div id="edit-profile-form" style="display: none;">
+                    <form method="post" action="">
+                        <input type="text" name="first_name" value="<?php echo htmlspecialchars($user['first_name']); ?>" required>
+                        <input type="text" name="last_name" value="<?php echo htmlspecialchars($user['last_name']); ?>" required>
+                        <input type="tel" name="phone_number" value="<?php echo htmlspecialchars($user['phone_number']); ?>" required>
+                        <input type="text" name="country" value="<?php echo htmlspecialchars($user['country']); ?>" required>
+                        <button type="submit" name="update_profile">Update Profile</button>
+                    </form>
+                </div>
+            </div>
 
         <h3>Upcoming Events</h3>
         <?php foreach ($events as $event): ?>
@@ -111,8 +183,14 @@ $events = $stmt->fetchAll();
                 <?php endif; ?>
             </div>
         <?php endforeach; ?>
-
+        <?php endif; ?>
         <a href="login.php?action=logout" class="btn">Logout</a>
     </div>
+    <script>
+        function showEditProfile() {
+            var form = document.getElementById('edit-profile-form');
+            form.style.display = form.style.display === 'none' ? 'block' : 'none';
+        }
+    </script>
 </body>
 </html>
