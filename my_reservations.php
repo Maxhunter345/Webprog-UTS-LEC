@@ -17,12 +17,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['cancel_registration'])
     try {
         $pdo->beginTransaction();
         
-        // Delete registration details
-        $stmt = $pdo->prepare("DELETE rd FROM registration_details rd 
-                              INNER JOIN registrations r ON rd.registration_id = r.id 
-                              WHERE r.user_id = ? AND r.event_id = ?");
-        $stmt->execute([$user_id, $event_id]);
-        
         // Delete registration
         $stmt = $pdo->prepare("DELETE FROM registrations WHERE user_id = ? AND event_id = ?");
         $stmt->execute([$user_id, $event_id]);
