@@ -146,41 +146,35 @@ $events = $stmt->fetchAll();
         <h3>Upcoming Events</h3>
         <?php foreach ($events as $event): ?>
             <div class="event">
-                <h4><?php echo htmlspecialchars($event['title'], ENT_QUOTES, 'UTF-8'); ?></h4>
-                <p>Date & Time: <?php echo $event['date_time']; ?></p>
-                <p>Country: <?php echo htmlspecialchars($event['country'], ENT_QUOTES, 'UTF-8'); ?></p>
-                <p>Location: <?php echo htmlspecialchars($event['location'], ENT_QUOTES, 'UTF-8'); ?></p>
-                <p>Description: <?php echo htmlspecialchars($event['description'], ENT_QUOTES, 'UTF-8'); ?></p>
-                <p>Visitors: <?php echo $event['current_visitors']; ?> / <?php echo $event['max_visitors']; ?></p>
-                
-                <h5>Featured Companies:</h5>
-                <div class="company-logos">
-                    <?php
-                    $companies = explode('|', $event['featured_companies']);
-                    foreach ($companies as $company):
-                        list($name, $logo_path) = explode(':', $company);
-                    ?>
-                        <div class="company">
-                            <img src="<?php echo htmlspecialchars($logo_path, ENT_QUOTES, 'UTF-8'); ?>" alt="<?php echo htmlspecialchars($name, ENT_QUOTES, 'UTF-8'); ?> logo">
-                            <span><?php echo htmlspecialchars($name, ENT_QUOTES, 'UTF-8'); ?></span>
-                        </div>
-                    <?php endforeach; ?>
+            <?php if ($event['event_image']): ?>
+                <div class="event-image">
+                    <img src="<?php echo htmlspecialchars($event['event_image']); ?>" alt="<?php echo htmlspecialchars($event['title']); ?>">
                 </div>
-                
-                <?php if ($event['user_registered']): ?>
-                    <p class="registered">You are registered for this event</p>
-                <?php elseif ($event['current_visitors'] < $event['max_visitors']): ?>
-                    <form method="post" action="">
-                        <input type="hidden" name="event_id" value="<?php echo $event['id']; ?>">
-                        <button type="submit" name="register_event">Register</button>
-                    </form>
-                <?php else: ?>
-                    <p class="full">This event is full</p>
-                <?php endif; ?>
+            <?php endif; ?>
+            <h4><?php echo htmlspecialchars($event['title']); ?></h4>
+            <p>Status: <span class="event-status <?php echo $event['status']; ?>"><?php echo ucfirst($event['status']); ?></span></p>
+            <p>Date & Time: <?php echo $event['date_time']; ?></p>
+            <p>Country: <?php echo htmlspecialchars($event['country']); ?></p>
+            <p>Location: <?php echo htmlspecialchars($event['location']); ?></p>
+            <p>Description: <?php echo htmlspecialchars($event['description']); ?></p>
+            <p>Visitors: <?php echo $event['current_visitors']; ?> / <?php echo $event['max_visitors']; ?></p>
+    
+            <?php if ($event['user_registered']): ?>
+                <p class="registered">You are registered for this event</p>
+            <?php elseif ($event['status'] == 'open' && $event['current_visitors'] < $event['max_visitors']): ?>
+                <form method="post" action="">
+                    <input type="hidden" name="event_id" value="<?php echo $event['id']; ?>">
+                    <button type="submit" name="register_event">Register</button>
+                </form>
+            <?php elseif ($event['status'] != 'open'): ?>
+                <p class="event-closed">Registration <?php echo $event['status']; ?></p>
+            <?php else: ?>
+                <p class="full">This event is full</p>
+            <?php endif; ?>
             </div>
-        <?php endforeach; ?>
-        <?php endif; ?>
-        <a href="login.php?action=logout" class="btn">Logout</a>
+            <?php endforeach; ?>
+            <?php endif; ?>
+            <a href="login.php?action=logout" class="btn">Logout</a>
     </div>
     <script>
         function showEditProfile() {

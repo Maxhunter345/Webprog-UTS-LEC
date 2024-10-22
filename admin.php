@@ -53,16 +53,33 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['create_event'])) {
     $country = htmlspecialchars($_POST['country'], ENT_QUOTES, 'UTF-8');
     $location = htmlspecialchars($_POST['location'], ENT_QUOTES, 'UTF-8');
     $max_visitors = (int)$_POST['max_visitors'];
+    $status = $_POST['status'];
     $featured_companies = isset($_POST['featured_companies']) ? $_POST['featured_companies'] : [];
 
-    $sql = "INSERT INTO events (title, description, date_time, country, location, max_visitors) 
-            VALUES (?, ?, ?, ?, ?, ?)";
-    
+    // Handle image upload
+    $event_image = null;
+    if (isset($_FILES['event_image']) && $_FILES['event_image']['error'] == 0) {
+        $allowed = ['jpg', 'jpeg', 'png', 'gif'];
+        $filename = $_FILES['event_image']['name'];
+        $filetype = pathinfo($filename, PATHINFO_EXTENSION);
+        
+        if (in_array(strtolower($filetype), $allowed)) {
+            if (!file_exists('event_images')) {
+                mkdir('event_images', 0777, true);
+            }
+            $new_filename = 'event_images/' . uniqid() . '.' . $filetype;
+            if (move_uploaded_file($_FILES['event_image']['tmp_name'], $new_filename)) {
+                $event_image = $new_filename;
+            }
+        }
+    }
+    $sql = "INSERT INTO events (title, description, date_time, country, location, max_visitors, status, event_image) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
     try {
         $pdo->beginTransaction();
         
         $stmt = $pdo->prepare($sql);
-        $stmt->execute([$title, $description, $date_time, $country, $location, $max_visitors]);
+        $stmt->execute([$title, $description, $date_time, $country, $location, $max_visitors, $status, $event_image]);
         $event_id = $pdo->lastInsertId();
         
         foreach ($featured_companies as $company_id) {
@@ -70,7 +87,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['create_event'])) {
             $stmt = $pdo->prepare($sql);
             $stmt->execute([$event_id, $company_id]);
         }
-        
         $pdo->commit();
         $success_message = "Event created successfully!";
     } catch (PDOException $e) {
@@ -189,19 +205,25 @@ $events = $stmt->fetchAll();
         </form>
 
         <h3>Create New Event</h3>
-        <form method="post" action="">
+        <form method="post" action="" enctype="multipart/form-data">
             <input type="text" name="title" placeholder="Event Title" required>
             <textarea name="description" placeholder="Event Description" required></textarea>
             <input type="datetime-local" name="date_time" required>
             <input type="text" name="country" placeholder="Country" required>
             <input type="text" name="location" placeholder="Location" required>
             <input type="number" name="max_visitors" placeholder="Max Visitors" required>
-            <select name="featured_companies[]" multiple>
-                <?php foreach ($companies as $company): ?>
-                    <option value="<?php echo $company['id']; ?>"><?php echo htmlspecialchars($company['name'], ENT_QUOTES, 'UTF-8'); ?></option>
-                <?php endforeach; ?>
+            <select name="status" required>
+                <option value="open">Open</option>
+                <option value="closed">Closed</option>
+                <option value="cancelled">Cancelled</option>
             </select>
-            <button type="submit" name="create_event">Create Event</button>
+            <input type="file" name="event_image" accept="image/*" required>
+            <select name="featured_companies[]" multiple>
+            <?php foreach ($companies as $company): ?>
+                <option value="<?php echo $company['id']; ?>"><?php echo htmlspecialchars($company['name'], ENT_QUOTES, 'UTF-8'); ?></option>
+            <?php endforeach; ?>
+        </select>
+        <button type="submit" name="create_event">Create Event</button>
         </form>
 
         <h3>Manage Events</h3>
