@@ -169,6 +169,7 @@ $events = $stmt->fetchAll();
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+    <?php include 'navbar-admin.php'; ?>
     <div class="container">
         <h1>Division Defence Expo 2024</h1>
         <h2>Admin Dashboard</h2>
