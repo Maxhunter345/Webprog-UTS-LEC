@@ -104,15 +104,39 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['edit_event'])) {
     $country = htmlspecialchars($_POST['country'], ENT_QUOTES, 'UTF-8');
     $location = htmlspecialchars($_POST['location'], ENT_QUOTES, 'UTF-8');
     $max_visitors = (int)$_POST['max_visitors'];
+    $status = $_POST['status']; // Capture the status field
     $featured_companies = isset($_POST['featured_companies']) ? $_POST['featured_companies'] : [];
 
-    $sql = "UPDATE events SET title = ?, description = ?, date_time = ?, country = ?, location = ?, max_visitors = ? WHERE id = ?";
+    // Handle event image upload if a new image is provided
+    if (isset($_FILES['event_image']) && $_FILES['event_image']['error'] == 0) {
+        $allowed = ['jpg', 'jpeg', 'png', 'gif'];
+        $filename = $_FILES['event_image']['name'];
+        $filetype = pathinfo($filename, PATHINFO_EXTENSION);
+        
+        if (in_array(strtolower($filetype), $allowed)) {
+            if (!file_exists('event_images')) {
+                mkdir('event_images', 0777, true);
+            }
+            $new_filename = 'event_images/' . uniqid() . '.' . $filetype;
+            if (move_uploaded_file($_FILES['event_image']['tmp_name'], $new_filename)) {
+                $event_image = $new_filename;
+            }
+        }
+    } else {
+        // If no new image is uploaded, keep the existing one
+        $stmt = $pdo->prepare("SELECT event_image FROM events WHERE id = ?");
+        $stmt->execute([$event_id]);
+        $event = $stmt->fetch();
+        $event_image = $event['event_image'];
+    }
+
+    $sql = "UPDATE events SET title = ?, description = ?, date_time = ?, country = ?, location = ?, max_visitors = ?, status = ?, event_image = ? WHERE id = ?";
     
     try {
         $pdo->beginTransaction();
         
         $stmt = $pdo->prepare($sql);
-        $stmt->execute([$title, $description, $date_time, $country, $location, $max_visitors, $event_id]);
+        $stmt->execute([$title, $description, $date_time, $country, $location, $max_visitors, $status, $event_image, $event_id]);
         
         // Delete existing featured companies for this event
         $stmt = $pdo->prepare("DELETE FROM event_companies WHERE event_id = ?");
@@ -230,6 +254,7 @@ $events = $stmt->fetchAll();
         <?php foreach ($events as $event): ?>
             <div class="event">
                 <h4><?php echo htmlspecialchars($event['title'], ENT_QUOTES, 'UTF-8'); ?></h4>
+                <p>Status: <span class="event-status <?php echo $event['status']; ?>"><?php echo ucfirst($event['status']); ?></span></p>
                 <p>Date & Time: <?php echo $event['date_time']; ?></p>
                 <p>Country: <?php echo htmlspecialchars($event['country'], ENT_QUOTES, 'UTF-8'); ?></p>
                 <p>Location: <?php echo htmlspecialchars($event['location'], ENT_QUOTES, 'UTF-8'); ?></p>
@@ -244,7 +269,7 @@ $events = $stmt->fetchAll();
                 </form>
                 
                 <div id="edit-form-<?php echo $event['id']; ?>" style="display: none;">
-                    <form method="post" action="">
+                    <form method="post" action="" enctype="multipart/form-data">
                         <input type="hidden" name="event_id" value="<?php echo $event['id']; ?>">
                         <input type="text" name="title" value="<?php echo htmlspecialchars($event['title'], ENT_QUOTES, 'UTF-8'); ?>" required>
                         <textarea name="description" required><?php echo htmlspecialchars($event['description'], ENT_QUOTES, 'UTF-8'); ?></textarea>
@@ -252,14 +277,20 @@ $events = $stmt->fetchAll();
                         <input type="text" name="country" value="<?php echo htmlspecialchars($event['country'], ENT_QUOTES, 'UTF-8'); ?>" required>
                         <input type="text" name="location" value="<?php echo htmlspecialchars($event['location'], ENT_QUOTES, 'UTF-8'); ?>" required>
                         <input type="number" name="max_visitors" value="<?php echo $event['max_visitors']; ?>" required>
+                        <select name="status" required>
+                            <option value="open" <?php if ($event['status'] == 'open') echo 'selected'; ?>>Open</option>
+                            <option value="closed" <?php if ($event['status'] == 'closed') echo 'selected'; ?>>Closed</option>
+                            <option value="cancelled" <?php if ($event['status'] == 'cancelled') echo 'selected'; ?>>Cancelled</option>
+                        </select>
+                        <input type="file" name="event_image" accept="image/*">
+        
                         <select name="featured_companies[]" multiple>
                             <?php foreach ($companies as $company): ?>
-                                <option value="<?php echo $company['id']; ?>" <?php echo (strpos($event['featured_companies'], $company['name']) !== false) ? 'selected' : ''; ?>><?php echo htmlspecialchars($company['name'], ENT_QUOTES, 'UTF-8'); ?></option>
+                            <option value="<?php echo $company['id']; ?>" <?php echo (strpos($event['featured_companies'], $company['name']) !== false) ? 'selected' : ''; ?>><?php echo htmlspecialchars($company['name'], ENT_QUOTES, 'UTF-8'); ?></option>
                             <?php endforeach; ?>
                         </select>
-                        <button type="submit" name="edit_event">Update Event</button>
-                    </form>
-                </div>
+                    <button type="submit" name="edit_event">Update Event</button>
+                </form>
             </div>
         <?php endforeach; ?>
 

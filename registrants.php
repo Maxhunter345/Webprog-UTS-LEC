@@ -2,6 +2,12 @@
 session_start();
 require_once 'db_config.php';
 
+// Include PhpSpreadsheet classes
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+
+require 'vendor/autoload.php';
+
 if (!isset($_SESSION['user_id']) || !$_SESSION['is_admin']) {
     header("Location: login.php");
     exit();
@@ -13,6 +19,73 @@ $events = $events_query->fetchAll();
 
 // Handle event filter
 $event_filter = isset($_GET['event_id']) ? (int)$_GET['event_id'] : null;
+
+// Handle the export action
+if (isset($_GET['action']) && $_GET['action'] == 'export') {
+    try {
+        // Prepare the data for export
+        $export_query = "
+            SELECT 
+                u.first_name,
+                u.last_name,
+                u.email,
+                u.phone_number,
+                u.country,
+                e.title as event_title,
+                r.registration_date
+            FROM registrations r
+            JOIN users u ON r.user_id = u.id
+            JOIN events e ON r.event_id = e.id
+        ";
+        
+        // Add filter if event is selected
+        if ($event_filter) {
+            $export_query .= " WHERE e.id = :event_id";
+        }
+        
+        $export_query .= " ORDER BY r.registration_date DESC";
+        
+        $stmt = $pdo->prepare($export_query);
+        if ($event_filter) {
+            $stmt->bindParam(':event_id', $event_filter);
+        }
+        $stmt->execute();
+        $registrants = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        
+        // Create a new Spreadsheet object
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        
+        // Set the header row
+        $headers = ['First Name', 'Last Name', 'Email', 'Phone Number', 'Country', 'Event Title', 'Registration Date'];
+        $sheet->fromArray($headers, NULL, 'A1');
+        
+        // Fill data
+        $rowNumber = 2;
+        foreach ($registrants as $registrant) {
+            $sheet->setCellValue('A' . $rowNumber, $registrant['first_name']);
+            $sheet->setCellValue('B' . $rowNumber, $registrant['last_name']);
+            $sheet->setCellValue('C' . $rowNumber, $registrant['email']);
+            $sheet->setCellValue('D' . $rowNumber, $registrant['phone_number']);
+            $sheet->setCellValue('E' . $rowNumber, $registrant['country']);
+            $sheet->setCellValue('F' . $rowNumber, $registrant['event_title']);
+            $sheet->setCellValue('G' . $rowNumber, $registrant['registration_date']);
+            $rowNumber++;
+        }
+        
+        // Set the header to force download
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment;filename="registrants.xlsx"');
+        header('Cache-Control: max-age=0');
+        
+        // Write the file to the output
+        $writer = new Xlsx($spreadsheet);
+        $writer->save('php://output');
+        exit();
+    } catch (Exception $e) {
+        $error_message = "Error exporting registrants: " . $e->getMessage();
+    }
+}
 
 // Updated query to include country
 $query = "
@@ -72,6 +145,14 @@ try {
                     </option>
                 <?php endforeach; ?>
             </select>
+        </form>
+
+        <form method="get" action="">
+            <input type="hidden" name="action" value="export">
+            <?php if ($event_filter): ?>
+            <input type="hidden" name="event_id" value="<?php echo $event_filter; ?>">
+            <?php endif; ?>
+        <button type="submit" class="export-button">Export to Excel</button>
         </form>
 
         <?php if (empty($registrants)): ?>

@@ -378,3 +378,30 @@ tr:hover {
         display: none; /* Hide logo text on mobile */
     }
 }
+
+.forgot-password-link {
+    display: block;
+    margin-top: 1rem;
+    color: #1877f2;
+    text-decoration: none;
+}
+
+.forgot-password-link:hover {
+    text-decoration: underline;
+}
+
+.export-button {
+    background-color: #28a745;
+    color: #ffffff;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 6px;
+    font-size: 1rem;
+    cursor: pointer;
+    margin-bottom: 1rem;
+    transition: background-color 0.3s;
+}
+
+.export-button:hover {
+    background-color: #218838;
+}

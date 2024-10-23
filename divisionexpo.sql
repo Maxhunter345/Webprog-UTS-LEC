@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Oct 22, 2024 at 02:00 PM
+-- Generation Time: Oct 23, 2024 at 06:59 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -38,7 +38,8 @@ CREATE TABLE `companies` (
 --
 
 INSERT INTO `companies` (`id`, `name`, `logo_path`) VALUES
-(1, 'Kalashnikov Concern', 'logo/67164ddda3e88.png');
+(1, 'Kalashnikov Concern', 'logo/67164ddda3e88.png'),
+(2, 'Wakanda', 'logo/6717a22f3e51e.jpg');
 
 -- --------------------------------------------------------
 
@@ -54,17 +55,18 @@ CREATE TABLE `events` (
   `country` varchar(100) NOT NULL,
   `location` varchar(255) NOT NULL,
   `max_visitors` int(11) NOT NULL,
-  `event_image` varchar(255) NOT NULL,
-  `status` char(9) NOT NULL,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `status` enum('open','closed','cancelled') NOT NULL DEFAULT 'open',
+  `event_image` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `events`
 --
 
-INSERT INTO `events` (`id`, `title`, `description`, `date_time`, `country`, `location`, `max_visitors`, `event_image`, `status`, `created_at`) VALUES
-(3, 'Russia Firearms Expo', 'Russian Firearms Expo in Moscow. Starts at 10th of November 2024 10:00 AM Feat. Kalashnikov Concern Ltd', '2024-11-10 10:00:00', 'Russian Federation', 'Moscow', 100, `event_images/6717a263d3e51.jpeg`, `open`, '2024-10-21 12:55:26');
+INSERT INTO `events` (`id`, `title`, `description`, `date_time`, `country`, `location`, `max_visitors`, `created_at`, `status`, `event_image`) VALUES
+(3, 'Russia Firearms Expo', 'Russian Firearms Expo in Moscow. Starts at 10th of November 2024 10:00 AM Feat. Kalashnikov Concern Ltd', '2024-11-10 10:00:00', 'Russian Federation', 'Moscow', 90, '2024-10-21 12:55:26', 'open', NULL),
+(4, 'Wakanda x Russia', 'Test', '2024-10-31 20:01:00', 'Wakanda', 'Wakanda Palace', 20, '2024-10-22 13:02:27', 'open', 'event_images/6717a263d3e51.jpeg');
 
 -- --------------------------------------------------------
 
@@ -82,7 +84,9 @@ CREATE TABLE `event_companies` (
 --
 
 INSERT INTO `event_companies` (`event_id`, `company_id`) VALUES
-(3, 1);
+(3, 1),
+(4, 1),
+(4, 2);
 
 -- --------------------------------------------------------
 
@@ -103,7 +107,8 @@ CREATE TABLE `registrations` (
 
 INSERT INTO `registrations` (`id`, `user_id`, `event_id`, `registration_date`) VALUES
 (5, 1, 3, '2024-10-22 11:30:25'),
-(6, 3, 3, '2024-10-22 11:39:40');
+(7, 4, 4, '2024-10-22 13:04:08'),
+(8, 4, 3, '2024-10-22 13:04:13');
 
 -- --------------------------------------------------------
 
@@ -130,7 +135,7 @@ CREATE TABLE `users` (
 INSERT INTO `users` (`id`, `email`, `password`, `is_admin`, `first_name`, `last_name`, `phone_number`, `country`, `profile_completed`) VALUES
 (1, 'alief987@protonmail.com', '$2y$10$4p3opOO9l4GFdg5SvHnrDevX/qkChnFfiKtBbF2WVzJGRIVEDqeKi', 0, 'Alif', 'Nurfaiz', '089614193149', 'Indonesia', 1),
 (2, 'alief987@division.expo.com', '$2y$10$35sOiSd68V3wybBQIsQ82uhHY6IsBAJmwocQG2TECu5GVF5.zDvW2', 1, NULL, NULL, NULL, NULL, 0),
-(3, 'testemail@test123.com', '$2y$10$B6kbO.a8kTTkeO/H/7NfUO/B5dBH/gHTJZGiIlnThStXCc5fm42ZS', 0, 'Tester', 'Testing', '(432) 589-3467', 'United States', 1);
+(4, 'testemail@test123.com', '$2y$10$qUZYE7KfDgTmjqN4Lh7VZuBCY0uKie8KVSC544z2y8/SBgb5KPEkm', 0, 'The ', 'Tester', '(432) 589-3467', 'United Testing', 1);
 
 --
 -- Indexes for dumped tables
@@ -178,25 +183,25 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `companies`
 --
 ALTER TABLE `companies`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `events`
 --
 ALTER TABLE `events`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `registrations`
 --
 ALTER TABLE `registrations`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- Constraints for dumped tables
