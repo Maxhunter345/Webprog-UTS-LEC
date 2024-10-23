@@ -54,6 +54,8 @@ CREATE TABLE `events` (
   `country` varchar(100) NOT NULL,
   `location` varchar(255) NOT NULL,
   `max_visitors` int(11) NOT NULL,
+  `event_image` varchar(255) NOT NULL,
+  `status` char(9) NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -61,8 +63,8 @@ CREATE TABLE `events` (
 -- Dumping data for table `events`
 --
 
-INSERT INTO `events` (`id`, `title`, `description`, `date_time`, `country`, `location`, `max_visitors`, `created_at`) VALUES
-(3, 'Russia Firearms Expo', 'Russian Firearms Expo in Moscow. Starts at 10th of November 2024 10:00 AM Feat. Kalashnikov Concern Ltd', '2024-11-10 10:00:00', 'Russian Federation', 'Moscow', 100, '2024-10-21 12:55:26');
+INSERT INTO `events` (`id`, `title`, `description`, `date_time`, `country`, `location`, `max_visitors`, `event_image`, `status`, `created_at`) VALUES
+(3, 'Russia Firearms Expo', 'Russian Firearms Expo in Moscow. Starts at 10th of November 2024 10:00 AM Feat. Kalashnikov Concern Ltd', '2024-11-10 10:00:00', 'Russian Federation', 'Moscow', 100, `event_images/6717a263d3e51.jpeg`, `open`, '2024-10-21 12:55:26');
 
 -- --------------------------------------------------------
 
