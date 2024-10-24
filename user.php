@@ -21,18 +21,56 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['update_profile'])) {
     $last_name = htmlspecialchars($_POST['last_name'], ENT_QUOTES, 'UTF-8');
     $phone_number = htmlspecialchars($_POST['phone_number'], ENT_QUOTES, 'UTF-8');
     $country = htmlspecialchars($_POST['country'], ENT_QUOTES, 'UTF-8');
+    $recovery_question_1 = htmlspecialchars($_POST['recovery_question_1'], ENT_QUOTES, 'UTF-8');
+    $recovery_answer_1 = htmlspecialchars($_POST['recovery_answer_1'], ENT_QUOTES, 'UTF-8');
+    $recovery_question_2 = htmlspecialchars($_POST['recovery_question_2'], ENT_QUOTES, 'UTF-8');
+    $recovery_answer_2 = htmlspecialchars($_POST['recovery_answer_2'], ENT_QUOTES, 'UTF-8');
     
+    // Validasi bahwa pertanyaan dan jawaban pemulihan telah diisi
+    if (empty($recovery_question_1) || empty($recovery_answer_1) || empty($recovery_question_2) || empty($recovery_answer_2)) {
+        $error_message = "Silakan pilih dua pertanyaan pemulihan dan isi jawabannya.";
+    } elseif ($recovery_question_1 == $recovery_question_2) {
+        $error_message = "Pertanyaan pemulihan tidak boleh sama.";
+    } else {
     try {
-        $stmt = $pdo->prepare("UPDATE users SET first_name = ?, last_name = ?, phone_number = ?, country = ?, profile_completed = TRUE WHERE id = ?");
-        $stmt->execute([$first_name, $last_name, $phone_number, $country, $user_id]);
-        $success_message = "Profile updated successfully!";
+        // Hash jawaban pemulihan
+        $hashed_recovery_answer_1 = password_hash($recovery_answer_1, PASSWORD_DEFAULT);
+        $hashed_recovery_answer_2 = password_hash($recovery_answer_2, PASSWORD_DEFAULT);
+
+        $stmt = $pdo->prepare("UPDATE users SET first_name = ?, last_name = ?, phone_number = ?, country = ?, recovery_question = ?, recovery_answer = ?, recovery_question_2 = ?, recovery_answer_2 = ?, profile_completed = TRUE WHERE id = ?");
+        $stmt->execute([$first_name, $last_name, $phone_number, $country, $recovery_question_1, $hashed_recovery_answer_1, $recovery_question_2, $hashed_recovery_answer_2, $user_id]);
+
+        $success_message = "Profil berhasil diperbarui!";
         $user['profile_completed'] = true;
         $user['first_name'] = $first_name;
         $user['last_name'] = $last_name;
         $user['phone_number'] = $phone_number;
         $user['country'] = $country;
+        $user['recovery_question'] = $recovery_question_1;
+        $user['recovery_question_2'] = $recovery_question_2;
     } catch (PDOException $e) {
         $error_message = "Error updating profile: " . $e->getMessage();
+    }
+}
+
+// Menangani pengaturan pertanyaan pemulihan
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['set_recovery'])) {
+    $recovery_question = htmlspecialchars($_POST['recovery_question'], ENT_QUOTES, 'UTF-8');
+    $recovery_answer = htmlspecialchars($_POST['recovery_answer'], ENT_QUOTES, 'UTF-8');
+
+    if (!empty($recovery_question) && !empty($recovery_answer)) {
+        $hashed_recovery_answer = password_hash($recovery_answer, PASSWORD_DEFAULT);
+
+        $stmt = $pdo->prepare("UPDATE users SET recovery_question = ?, recovery_answer = ? WHERE id = ?");
+        if ($stmt->execute([$recovery_question, $hashed_recovery_answer, $user_id])) {
+            $success_message = "Pertanyaan pemulihan berhasil disimpan!";
+            $user['recovery_question'] = $recovery_question;
+        } else {
+            $error_message = "Terjadi kesalahan saat menyimpan pertanyaan pemulihan.";
+        }
+    } else {
+        $error_message = "Silakan pilih pertanyaan dan masukkan jawaban Anda.";
+        }
     }
 }
 
@@ -105,10 +143,10 @@ $events = $stmt->fetchAll();
         <h2>User Dashboard</h2>
         
         <?php if ($success_message): ?>
-            <p class="success"><?php echo $success_message; ?></p>
+            <p class="success"><?php echo htmlspecialchars($success_message, ENT_QUOTES, 'UTF-8'); ?></p>
         <?php endif; ?>
         <?php if ($error_message): ?>
-            <p class="error"><?php echo $error_message; ?></p>
+            <p class="error"><?php echo htmlspecialchars($error_message, ENT_QUOTES, 'UTF-8'); ?></p>
         <?php endif; ?>
 
         <?php if (!$user['profile_completed']): ?>
@@ -120,17 +158,35 @@ $events = $stmt->fetchAll();
                     <input type="text" name="last_name" placeholder="Last Name" required>
                     <input type="tel" name="phone_number" placeholder="Phone Number" required>
                     <input type="text" name="country" placeholder="Country" required>
+                <!-- Pertanyaan Pemulihan -->
+                <label for="recovery_question_1">Pilih Pertanyaan Pemulihan 1:</label>
+                    <select name="recovery_question_1" id="recovery_question_1" required>
+                        <option value="">-- Pilih Pertanyaan --</option>
+                        <option value="Siapa Nama Orang tua?">Siapa Nama Orang tua?</option>
+                        <option value="Apa nama kota tempat Anda dilahirkan?">Apa nama kota tempat Anda dilahirkan?</option>
+                        <option value="Kamu bersekolah di SD mana?">Kamu bersekolah di SD mana?</option>
+                    </select>
+                    <input type="text" name="recovery_answer_1" placeholder="Jawaban Anda" required>
+
+                    <label for="recovery_question_2">Pilih Pertanyaan Pemulihan 2:</label>
+                    <select name="recovery_question_2" id="recovery_question_2" required>
+                        <option value="">-- Pilih Pertanyaan --</option>
+                        <option value="Siapa pahlawan masa kecil?">Siapa Nama Orang tua?</option>
+                        <option value="Di mana liburan keluarga terbaik Anda saat kecil?">Apa nama kota tempat Anda dilahirkan?</option>
+                        <option value="Apa mobil pertama Anda?">Kamu bersekolah di SD mana?</option>
+                    </select>
+                    <input type="text" name="recovery_answer_2" placeholder="Jawaban Anda" required>
                     <button type="submit" name="update_profile">Save Profile</button>
                 </form>
             </div>
         <?php else: ?>
             <div class="profile-section">
                 <h3>My Profile</h3>
-                <p>Name: <?php echo htmlspecialchars($user['first_name'] . ' ' . $user['last_name']); ?></p>
-                <p>Email: <?php echo htmlspecialchars($user['email']); ?></p>
-                <p>Phone: <?php echo htmlspecialchars($user['phone_number']); ?></p>
-                <p>Country: <?php echo htmlspecialchars($user['country']); ?></p>
-                <button onclick="showEditProfile()">Edit Profile</button>
+                <p>Name: <?php echo htmlspecialchars($user['first_name'] . ' ' . $user['last_name'], ENT_QUOTES, 'UTF-8'); ?></p>
+                <p>Email: <?php echo htmlspecialchars($user['email'], ENT_QUOTES, 'UTF-8'); ?></p>
+                <p>Phone: <?php echo htmlspecialchars($user['phone_number'], ENT_QUOTES, 'UTF-8'); ?></p>
+                <p>Country: <?php echo htmlspecialchars($user['country'], ENT_QUOTES, 'UTF-8'); ?></p>
+                <button onclick="showEditProfile()">Edit Profil</button>
                 
                 <div id="edit-profile-form" style="display: none;">
                     <form method="post" action="">
@@ -175,6 +231,9 @@ $events = $stmt->fetchAll();
             <?php endforeach; ?>
             <?php endif; ?>
             <a href="login.php?action=logout" class="btn">Logout</a>
+            <div>
+            <a href="index.php" class="back-btn">Kembali ke Home</a>
+            </div>
     </div>
     <script>
         function showEditProfile() {

@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Oct 23, 2024 at 06:59 PM
+-- Generation Time: Oct 24, 2024 at 07:21 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -108,7 +108,8 @@ CREATE TABLE `registrations` (
 INSERT INTO `registrations` (`id`, `user_id`, `event_id`, `registration_date`) VALUES
 (5, 1, 3, '2024-10-22 11:30:25'),
 (7, 4, 4, '2024-10-22 13:04:08'),
-(8, 4, 3, '2024-10-22 13:04:13');
+(8, 4, 3, '2024-10-22 13:04:13'),
+(9, 7, 4, '2024-10-24 03:43:42');
 
 -- --------------------------------------------------------
 
@@ -125,17 +126,26 @@ CREATE TABLE `users` (
   `last_name` varchar(50) DEFAULT NULL,
   `phone_number` varchar(20) DEFAULT NULL,
   `country` varchar(100) DEFAULT NULL,
-  `profile_completed` tinyint(1) DEFAULT 0
+  `profile_completed` tinyint(1) DEFAULT 0,
+  `failed_login_attempts` int(11) DEFAULT 0,
+  `lockout_time` datetime DEFAULT NULL,
+  `recovery_question` varchar(255) NOT NULL,
+  `recovery_answer` varchar(255) NOT NULL,
+  `recovery_question_2` varchar(255) DEFAULT NULL,
+  `recovery_answer_2` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `users`
 --
 
-INSERT INTO `users` (`id`, `email`, `password`, `is_admin`, `first_name`, `last_name`, `phone_number`, `country`, `profile_completed`) VALUES
-(1, 'alief987@protonmail.com', '$2y$10$4p3opOO9l4GFdg5SvHnrDevX/qkChnFfiKtBbF2WVzJGRIVEDqeKi', 0, 'Alif', 'Nurfaiz', '089614193149', 'Indonesia', 1),
-(2, 'alief987@division.expo.com', '$2y$10$35sOiSd68V3wybBQIsQ82uhHY6IsBAJmwocQG2TECu5GVF5.zDvW2', 1, NULL, NULL, NULL, NULL, 0),
-(4, 'testemail@test123.com', '$2y$10$qUZYE7KfDgTmjqN4Lh7VZuBCY0uKie8KVSC544z2y8/SBgb5KPEkm', 0, 'The ', 'Tester', '(432) 589-3467', 'United Testing', 1);
+INSERT INTO `users` (`id`, `email`, `password`, `is_admin`, `first_name`, `last_name`, `phone_number`, `country`, `profile_completed`, `failed_login_attempts`, `lockout_time`, `recovery_question`, `recovery_answer`, `recovery_question_2`, `recovery_answer_2`) VALUES
+(1, 'alief987@protonmail.com', '$2y$10$4p3opOO9l4GFdg5SvHnrDevX/qkChnFfiKtBbF2WVzJGRIVEDqeKi', 0, 'Alif', 'Nurfaiz', '089614193149', 'Indonesia', 1, 0, NULL, '', '', NULL, NULL),
+(2, 'alief987@division.expo.com', '$2y$10$35sOiSd68V3wybBQIsQ82uhHY6IsBAJmwocQG2TECu5GVF5.zDvW2', 1, NULL, NULL, NULL, NULL, 0, 0, NULL, '', '', NULL, NULL),
+(4, 'testemail@test123.com', '$2y$10$qUZYE7KfDgTmjqN4Lh7VZuBCY0uKie8KVSC544z2y8/SBgb5KPEkm', 0, 'The ', 'Tester', '(432) 589-3467', 'United Testing', 1, 0, NULL, '', '', NULL, NULL),
+(5, 'maxell.nathanael@division.expo.com', '$2y$10$2llC1tkyGwb7RiEF5m536OQbpOP4LrhdWoNi7YsUQR1tqJpNa8fYi', 1, NULL, NULL, NULL, NULL, 0, 0, NULL, '', '', NULL, NULL),
+(7, 'john.thor@umn.ac.id', '$2y$10$8gLQKA75dNoNLdjn5yzeLeL6StQKWZmDLKz.czy65eJYbmRG6cnbG', 0, 'john', 'thor', '123123123', 'Wakanda', 1, 0, NULL, '', '', NULL, NULL),
+(27, '123@123.com', '$2y$10$4MSKtgSb0Uc3RMrIohIsde6Ptg4TUCT0Iur8KRNq9pMFuVRLhHa7.', 0, '123', '123', '123', '123', 1, 0, NULL, 'Siapa Nama Orang tua?', '$2y$10$VYsHk/RsdoGZH3p5WPUaT.7xaoHnY.o0IbifLSU/s9pQWa1AmHYHq', 'Apa nama kota tempat Anda dilahirkan?', '$2y$10$tj5j2vVszf7POy1chhJGSeCtO/SE2kSRrheIJg/qfAiLfu8m5VR/i');
 
 --
 -- Indexes for dumped tables
@@ -195,13 +205,13 @@ ALTER TABLE `events`
 -- AUTO_INCREMENT for table `registrations`
 --
 ALTER TABLE `registrations`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=28;
 
 --
 -- Constraints for dumped tables
