@@ -71,7 +71,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 }
 ?>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
     <meta charset="UTF-8">
     <title>Forgot Password - Division Defence Expo 2024</title>
@@ -81,7 +81,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <!-- Header dengan Efek Parallax -->
     <div class="header">
     <div class="container">
-        <h2>Forgot Password</h2>
+        <h2>Lupa Password</h2>
         <?php
         if (!empty($error)) {
             echo "<p class='error'>" . htmlspecialchars($error, ENT_QUOTES, 'UTF-8') . "</p>";

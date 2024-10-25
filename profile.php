@@ -129,7 +129,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 <input type="text" name="country" value="<?php echo htmlspecialchars($user['country']); ?>" placeholder="Country" required>
                 <button type="submit" name="update_profile">Update Profile</button>
             </form>
-
             <h3>Change Password</h3>
             <form method="post" action="profile.php?edit=true">
                 <input type="password" name="current_password" placeholder="Current Password" required>
