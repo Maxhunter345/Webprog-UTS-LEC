@@ -20,7 +20,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $recovery_question_2 = $user['recovery_question_2'];
             $step = 2;
         } else {
-            $error = "Email tidak ditemukan atau pertanyaan pemulihan belum diatur.";
+            $error = "Email not found or recovery questions not set.";
         }
     } elseif (isset($_POST['submit_answers'])) {
         // Verifikasi jawaban pemulihan
@@ -40,7 +40,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $_SESSION['reset_user_id'] = $user['id'];
             $step = 3;
         } else {
-            $error = "Jawaban pemulihan salah.";
+            $error = "Recovery answers are incorrect.";
             $recovery_question_1 = $_SESSION['recovery_question_1'];
             $recovery_question_2 = $_SESSION['recovery_question_2'];
             $step = 2;
@@ -51,7 +51,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $confirm_password = $_POST['confirm_password'];
 
         if ($new_password !== $confirm_password) {
-            $error = "Password tidak cocok.";
+            $error = "Passwords do not match.";
             $step = 3;
         } else {
             $hashed_password = password_hash($new_password, PASSWORD_DEFAULT);
@@ -59,11 +59,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
             $stmt = $pdo->prepare("UPDATE users SET password = ?, failed_login_attempts = 0, lockout_time = NULL WHERE id = ?");
             if ($stmt->execute([$hashed_password, $user_id])) {
-                $success = "Password berhasil direset. Silakan login.";
+                $success = "Password has been reset successfully. Please log in.";
                 // Hapus variabel sesi
                 unset($_SESSION['reset_email'], $_SESSION['reset_user_id'], $_SESSION['recovery_question_1'], $_SESSION['recovery_question_2']);
             } else {
-                $error = "Terjadi kesalahan saat mereset password.";
+                $error = "An error occurred while resetting the password.";
                 $step = 3;
             }
         }
@@ -74,7 +74,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <title>Lupa Password - Division Defence Expo 2024</title>
+    <title>Forgot Password - Division Defence Expo 2024</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -90,28 +90,28 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         } elseif ($step == 1) {
         ?>
         <form method="post" action="">
-            <input type="email" name="email" placeholder="Masukkan email Anda" required>
-            <button type="submit" name="submit_email">Lanjutkan</button>
+            <input type="email" name="email" placeholder="Enter your email" required>
+            <button type="submit" name="submit_email">Continue</button>
         </form>
         <?php } elseif ($step == 2) { ?>
         <form method="post" action="">
-            <p>Pertanyaan Pemulihan 1: <strong><?php echo htmlspecialchars($recovery_question_1, ENT_QUOTES, 'UTF-8'); ?></strong></p>
-            <input type="text" name="recovery_answer_1" placeholder="Jawaban Anda" required>
-            <p>Pertanyaan Pemulihan 2: <strong><?php echo htmlspecialchars($recovery_question_2, ENT_QUOTES, 'UTF-8'); ?></strong></p>
-            <input type="text" name="recovery_answer_2" placeholder="Jawaban Anda" required>
-            <button type="submit" name="submit_answers">Lanjutkan</button>
+            <p>Recovery Question 1: <strong><?php echo htmlspecialchars($recovery_question_1, ENT_QUOTES, 'UTF-8'); ?></strong></p>
+            <input type="text" name="recovery_answer_1" placeholder="Your Answer" required>
+            <p>Recovery Question 2: <strong><?php echo htmlspecialchars($recovery_question_2, ENT_QUOTES, 'UTF-8'); ?></strong></p>
+            <input type="text" name="recovery_answer_2" placeholder="Your Answer" required>
+            <button type="submit" name="submit_answers">Continue</button>
         </form>
         <?php
             $_SESSION['recovery_question_1'] = $recovery_question_1;
             $_SESSION['recovery_question_2'] = $recovery_question_2;
         } elseif ($step == 3) { ?>
         <form method="post" action="">
-            <input type="password" name="new_password" placeholder="Password Baru" required>
-            <input type="password" name="confirm_password" placeholder="Konfirmasi Password Baru" required>
+            <input type="password" name="new_password" placeholder="New Password" required>
+            <input type="password" name="confirm_password" placeholder="Confirm New Password" required>
             <button type="submit" name="reset_password">Reset Password</button>
         </form>
         <?php } ?>
-        <a href="login.php" class="back-btn">Kembali ke Login</a>
+        <a href="login.php" class="back-btn">Back to Login</a>
     </div>
 </body>
 </html>

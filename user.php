@@ -171,9 +171,9 @@ $events = $stmt->fetchAll();
                     <label for="recovery_question_2">Pilih Pertanyaan Pemulihan 2:</label>
                     <select name="recovery_question_2" id="recovery_question_2" required>
                         <option value="">-- Pilih Pertanyaan --</option>
-                        <option value="Siapa Nama Orang tua?">Siapa Nama Orang tua?</option>
-                        <option value="Apa nama kota tempat Anda dilahirkan?">Apa nama kota tempat Anda dilahirkan?</option>
-                        <option value="Kamu bersekolah di SD mana?">Kamu bersekolah di SD mana?</option>
+                        <option value="Siapa pahlawan masa kecil?">Siapa Nama Orang tua?</option>
+                        <option value="Di mana liburan keluarga terbaik Anda saat kecil?">Apa nama kota tempat Anda dilahirkan?</option>
+                        <option value="Apa mobil pertama Anda?">Kamu bersekolah di SD mana?</option>
                     </select>
                     <input type="text" name="recovery_answer_2" placeholder="Jawaban Anda" required>
                     <button type="submit" name="update_profile">Save Profile</button>
@@ -231,6 +231,9 @@ $events = $stmt->fetchAll();
             <?php endforeach; ?>
             <?php endif; ?>
             <a href="login.php?action=logout" class="btn">Logout</a>
+            <div>
+            <a href="index.php" class="back-btn">Kembali ke Home</a>
+            </div>
     </div>
     <script>
         function showEditProfile() {

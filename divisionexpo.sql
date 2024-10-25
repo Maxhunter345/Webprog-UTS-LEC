@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Oct 24, 2024 at 09:25 AM
+-- Generation Time: Oct 24, 2024 at 07:21 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -146,6 +146,7 @@ INSERT INTO `users` (`id`, `email`, `password`, `is_admin`, `first_name`, `last_
 (5, 'maxell.nathanael@division.expo.com', '$2y$10$2llC1tkyGwb7RiEF5m536OQbpOP4LrhdWoNi7YsUQR1tqJpNa8fYi', 1, NULL, NULL, NULL, NULL, 0, 0, NULL, '', '', NULL, NULL),
 (7, 'john.thor@umn.ac.id', '$2y$10$8gLQKA75dNoNLdjn5yzeLeL6StQKWZmDLKz.czy65eJYbmRG6cnbG', 0, 'john', 'thor', '123123123', 'Wakanda', 1, 0, NULL, '', '', NULL, NULL),
 (25, 'omagah@student.umn.ac.id', '$2y$10$b1q8Alnxzw6KPolSOvJAUOfpaLPwRxPD9/t.PJh54lREEsiVP6LLW', 0, NULL, NULL, NULL, NULL, 0, 0, NULL, '', '', NULL, NULL);
+(27, '123@123.com', '$2y$10$4MSKtgSb0Uc3RMrIohIsde6Ptg4TUCT0Iur8KRNq9pMFuVRLhHa7.', 0, '123', '123', '123', '123', 1, 0, NULL, 'Siapa Nama Orang tua?', '$2y$10$VYsHk/RsdoGZH3p5WPUaT.7xaoHnY.o0IbifLSU/s9pQWa1AmHYHq', 'Apa nama kota tempat Anda dilahirkan?', '$2y$10$tj5j2vVszf7POy1chhJGSeCtO/SE2kSRrheIJg/qfAiLfu8m5VR/i');
 
 --
 -- Indexes for dumped tables
@@ -212,6 +213,7 @@ ALTER TABLE `registrations`
 --
 ALTER TABLE `users`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=26;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=28;
 
 --
 -- Constraints for dumped tables

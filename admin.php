@@ -295,6 +295,9 @@ $events = $stmt->fetchAll();
         <?php endforeach; ?>
 
         <a href="login.php?action=logout" class="btn">Logout</a>
+        <div>
+        <a href="index.php" class="back-btn">Kembali ke Home</a>
+        </div>
     </div>
 
     <script>

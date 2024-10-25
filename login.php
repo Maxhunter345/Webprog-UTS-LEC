@@ -59,11 +59,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
                     if ($failed_attempts >= 5) {
                         // Kunci akun
-                        $lockout_time = date("Y-m-d H:i:s", strtotime('+15 minutes'));
+                        $lockout_time = date("Y-m-d H:i:s", strtotime('+1 minutes'));
                         $error = "Akun Anda terkunci setelah 5 kali percobaan login yang gagal.";
-                        // Redirect ke halaman lupa password
-                        header("Location: forgot_password.php?email=" . urlencode($email));
-                        exit();
                     } else {
                         $error = "Email atau password salah.";
                     }
