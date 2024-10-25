@@ -200,6 +200,15 @@ $stmt = $pdo->query("
 $events = $stmt->fetchAll();
 ?>
 
+<script>
+    (function() {
+        const isDarkMode = localStorage.getItem('theme') === 'dark';
+        if (isDarkMode) {
+            document.documentElement.classList.add('dark-mode');
+        }
+    })();
+</script>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -207,9 +216,12 @@ $events = $stmt->fetchAll();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard - Division Defence Expo 2024</title>
     <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
     <?php include 'navbar-admin.php'; ?>
+    <!-- Header dengan Efek Parallax -->
+    <div class="header">
     <div class="container">
         <h1>Division Defence Expo 2024</h1>
         <h2>Admin Dashboard</h2>
@@ -295,9 +307,58 @@ $events = $stmt->fetchAll();
         <?php endforeach; ?>
 
         <a href="login.php?action=logout" class="btn">Logout</a>
+        <div>
     </div>
-
+</div>
+    <a href="index.php" class="back-btn">Kembali ke Home</a>
+    <!-- Tombol Scroll ke Atas -->
+    <button id="scrollTopBtn" title="Kembali ke atas">
+        <i class="fa-solid fa-arrow-up" style="color: #74C0FC;"></i>
+    </button>
+</div>
+    
+    <!-- Script JavaScript -->
     <script>
+        // Fungsi untuk Tombol Scroll ke Atas
+        window.onscroll = function() {scrollFunction()};
+
+        function scrollFunction() {
+            const scrollTopBtn = document.getElementById("scrollTopBtn");
+            if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
+                scrollTopBtn.style.display = "block";
+            } else {
+                scrollTopBtn.style.display = "none";
+            }
+        }
+
+        document.getElementById('scrollTopBtn').addEventListener('click', function(){
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+        
+        // Function to scroll to top
+        function scrollToTop() {
+            window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+            });
+        }
+        
+    // Fungsi untuk Mengupdate Ikon Tema
+    function updateThemeIcon(isDarkMode) {
+        const themeIcon = document.getElementById('theme-icon');
+        if (themeIcon) {
+            themeIcon.className = isDarkMode ? 'fas fa-sun' : 'fas fa-moon';
+        }
+    }
+    // Inisialisasi Tema dan Ikon pada Saat Halaman Dimuat
+    document.addEventListener('DOMContentLoaded', function() {
+        const isDarkMode = localStorage.getItem('theme') === 'dark';
+        if (isDarkMode) {
+            document.documentElement.classList.add('dark-mode');
+        }
+        updateThemeIcon(isDarkMode);
+    });
+        // Fungsi untuk menampilkan/menghilangkan form edit
         function showEditForm(eventId) {
             var form = document.getElementById('edit-form-' + eventId);
             form.style.display = form.style.display === 'none' ? 'block' : 'none';

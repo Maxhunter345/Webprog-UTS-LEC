@@ -41,6 +41,15 @@ $stmt->execute([$user_id]);
 $registered_events = $stmt->fetchAll();
 ?>
 
+<script>
+    (function() {
+        const isDarkMode = localStorage.getItem('theme') === 'dark';
+        if (isDarkMode) {
+            document.documentElement.classList.add('dark-mode');
+        }
+    })();
+</script>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -48,10 +57,13 @@ $registered_events = $stmt->fetchAll();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Reservations - Division Defence Expo 2024</title>
     <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
     <?php include 'navbar.php'; ?>
     
+    <!-- Header dengan Efek Parallax -->
+    <div class="header">
     <div class="container">
         <h2>My Reservations</h2>
         
@@ -64,6 +76,9 @@ $registered_events = $stmt->fetchAll();
 
         <?php if (empty($registered_events)): ?>
             <p>You haven't registered for any events yet.</p>
+        <div>
+        <a href="user.php" class="back-btn">Kembali ke Main Page</a>
+        </div>
         <?php else: ?>
             <?php foreach ($registered_events as $event): ?>
                 <div class="event">
@@ -80,5 +95,49 @@ $registered_events = $stmt->fetchAll();
             <?php endforeach; ?>
         <?php endif; ?>
     </div>
+</div>
+        <!-- Tombol Scroll ke Atas -->
+        <button id="scrollTopBtn" title="Kembali ke atas">
+            <i class="fa-solid fa-arrow-up" style="color: #74C0FC;"></i>
+        </button>
+
+    <!-- Script JavaScript -->
+    <script>
+        navbarToggler.addEventListener('click', function() {
+        navbarLinks.classList.toggle('active');
+        // Tambahkan animasi rotasi ikon hamburger
+        const icon = navbarToggler.querySelector('.fas');
+        icon.classList.toggle('rotate');
+        });
+        
+        // Fungsi untuk Tombol Scroll ke Atas
+        window.onscroll = function() {scrollFunction()};
+
+        function scrollFunction() {
+            const scrollTopBtn = document.getElementById("scrollTopBtn");
+            if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
+                scrollTopBtn.style.display = "block";
+            } else {
+                scrollTopBtn.style.display = "none";
+            }
+        }
+
+        document.getElementById('scrollTopBtn').addEventListener('click', function(){
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+
+        function initializeTheme() {
+            const isDarkMode = document.documentElement.classList.contains('dark-mode');
+            document.getElementById('theme-icon').className = isDarkMode ? 'fas fa-sun' : 'fas fa-moon';
+        }
+
+        function toggleTheme() {
+            const isDarkMode = document.body.classList.toggle('dark-mode');
+            document.getElementById('theme-icon').className = isDarkMode ? 'fas fa-sun' : 'fas fa-moon';
+            localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
+        }
+            // Call initialize on page load
+            document.addEventListener('DOMContentLoaded', initializeTheme);
+    </script>
 </body>
 </html>

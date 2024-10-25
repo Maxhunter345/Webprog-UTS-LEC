@@ -53,10 +53,13 @@ $users = $stmt->fetchAll();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>User Management - Division Defence Expo 2024</title>
     <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
     <?php include 'navbar-admin.php'; ?>
     
+    <!-- Header dengan Efek Parallax -->
+    <div class="header">
     <div class="container">
         <h2>User Management</h2>
         
@@ -104,6 +107,55 @@ $users = $stmt->fetchAll();
                 </tbody>
             </table>
         </div>
+        <a href="index.php" class="back-btn">Kembali ke Home</a>
     </div>
+</div>
+        <!-- Tombol Scroll ke Atas -->
+        <button id="scrollTopBtn" title="Kembali ke atas">
+            <i class="fa-solid fa-arrow-up" style="color: #74C0FC;"></i>
+        </button>
+        <!-- Script JavaScript -->
+<script>
+        navbarToggler.addEventListener('click', function() {
+        navbarLinks.classList.toggle('active');
+        // Tambahkan animasi rotasi ikon hamburger
+        const icon = navbarToggler.querySelector('.fas');
+        icon.classList.toggle('rotate');
+
+        // Fungsi untuk Tombol Scroll ke Atas
+    window.onscroll = function() {scrollFunction()};
+
+navbarToggler.addEventListener('click', function() {
+navbarLinks.classList.toggle('active');
+// Tambahkan animasi rotasi ikon hamburger
+const icon = navbarToggler.querySelector('.fas');
+icon.classList.toggle('rotate');
+
+function scrollFunction() {
+const scrollTopBtn = document.getElementById("scrollTopBtn");
+if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
+    scrollTopBtn.style.display = "block";
+} else {
+    scrollTopBtn.style.display = "none";
+}
+}
+
+document.getElementById('scrollTopBtn').addEventListener('click', function(){
+window.scrollTo({ top: 0, behavior: 'smooth' });
+});
+
+// Function to scroll to top
+function scrollToTop() {
+window.scrollTo({
+top: 0,
+behavior: 'smooth'
+});
+}
+        
+    function showEditProfile() {
+        var form = document.getElementById('edit-profile-form');
+        form.style.display = form.style.display === 'none' ? 'block' : 'none';
+    }
+    </script>
 </body>
 </html>
